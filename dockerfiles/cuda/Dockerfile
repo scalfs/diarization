@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
     sudo \
+    wget \
     git \
     bzip2 \
     libx11-6 \
@@ -32,6 +33,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38
     && ~/miniconda.sh -b -p ~/miniconda \
     && rm ~/miniconda.sh \
     && conda install -y python==3.8.0 \
+    && conda config --add channels conda-forge \
     && conda clean -ya
 
 # CUDA 11.0-specific steps
@@ -44,7 +46,7 @@ RUN conda install -y -c pytorch \
     "scikit-learn" \
     "tqdm" \
     "pyyaml" \
-    "soundfile" \
+    "pysoundfile" \
     && conda clean -ya
 
 # Set the default command to python3
