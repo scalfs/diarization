@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 # Install some basic utilities
 RUN apt-get update && apt-get install -y \
@@ -24,28 +24,29 @@ USER user
 ENV HOME=/home/user
 RUN chmod 777 /home/user
 
-# Install Miniconda and Python 3.6
+# Install Miniconda and Python 3.8
 ENV CONDA_AUTO_UPDATE_CONDA=false
 ENV PATH=/home/user/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
- && chmod +x ~/miniconda.sh \
- && ~/miniconda.sh -b -p ~/miniconda \
- && rm ~/miniconda.sh \
- && conda install -y python==3.6.9 \
- && conda clean -ya
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
+    && chmod +x ~/miniconda.sh \
+    && ~/miniconda.sh -b -p ~/miniconda \
+    && rm ~/miniconda.sh \
+    && conda install -y python==3.8.0 \
+    && conda config --add channels conda-forge \
+    && conda clean -ya
 
 # No CUDA-specific steps
-ENV NO_CUDA=1
 RUN conda install -y -c pytorch \
     cpuonly \
-    "pytorch=1.6.0=py3.6_cpu_0" \
-    "torchvision=0.7.0=py36_cpu" \
-    "torchaudio=0.6.0=py36" \
+    "pytorch=1.7.0=py3.8_cpu_0" \
+    "torchvision=0.8.1=py38_cpu" \
+    "torchaudio=0.7.0=py38" \
     "scipy" \
     "scikit-learn" \
     "tqdm" \
     "pyyaml" \
- && conda clean -ya
+    "pysoundfile" \
+    && conda clean -ya
 
 # # Set the default command to python3
 # CMD ["python3"]
