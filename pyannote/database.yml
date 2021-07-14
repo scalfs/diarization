@@ -1,0 +1,39 @@
+Databases:
+  AMI: ./amicorpus/*/audio/{uri}.wav
+  MUSAN: ./musan/{uri}.wav
+  VOXCON: ../../datasets/voxconverse/sample/{uri}.wav
+
+Protocols:
+  VOXCON:
+    SpeakerDiarization:
+      Sample:
+        test:
+          uri: ../lists/voxconverse/sample.lst
+          annotation: ../lists/voxconverse/sample.rttm
+          annotated: ../lists/voxconverse/sample.uem
+
+  AMI:
+    SpeakerDiarization:
+      MixHeadset:
+        train:
+          uri: ./AMI/MixHeadset.train.lst
+          annotation: ./AMI/MixHeadset.train.rttm
+          annotated: ./AMI/MixHeadset.train.uem
+        development:
+          uri: ./AMI/MixHeadset.development.lst
+          annotation: ./AMI/MixHeadset.development.rttm
+          annotated: ./AMI/MixHeadset.development.uem
+        test:
+          uri: ./AMI/MixHeadset.test.lst
+          annotation: ./AMI/MixHeadset.test.rttm
+          annotated: ./AMI/MixHeadset.test.uem
+  MUSAN:
+    Collection:
+      BackgroundNoise:
+        uri: ./MUSAN/background_noise.txt
+      Noise:
+        uri: ./MUSAN/noise.txt
+      Music:
+        uri: ./MUSAN/music.txt
+      Speech:
+        uri: ./MUSAN/speech.txt
