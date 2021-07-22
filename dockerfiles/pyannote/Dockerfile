@@ -1,6 +1,7 @@
 FROM jupyter/scipy-notebook:latest
 
-RUN pip3 install torch pyannote.audio
+RUN pip3 install pyannote.audio==1.1.1
+RUN pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 ENV PYANNOTE_DATABASE_CONFIG=/home/jovyan/work/uis-rnn-voxsrc20/pyannote/database.yml
 ENV EXP_DIR=/home/jovyan/work/uis-rnn-voxsrc20/pyannote
