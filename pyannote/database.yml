@@ -1,7 +1,7 @@
 Databases:
   AMI: ./amicorpus/*/audio/{uri}.wav
   MUSAN: ./musan/{uri}.wav
-  VOXCON: ../../datasets/voxconverse/sample/{uri}.wav
+  VOXCON: /home/jovyan/work/uis-rnn-voxsrc20/data/voxconverse/sample/{uri}.wav
 
 Protocols:
   VOXCON:
