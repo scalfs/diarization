@@ -11,6 +11,15 @@ Protocols:
           uri: ../lists/voxconverse/sample.lst
           annotation: ../lists/voxconverse/sample.rttm
           annotated: ../lists/voxconverse/sample.uem
+      Challenge:
+        test:
+          uri: /home/jovyan/work/datasets/voxsrc2021/test/test.lst
+          annotation: /home/jovyan/work/datasets/voxsrc2021/test/rttm/{uri}.rttm
+          annotated: /home/jovyan/work/datasets/voxsrc2021/test/uem/{uri}.uem
+        dev:
+          uri: /home/jovyan/work/datasets/voxsrc2021/dev/dev.lst
+          annotation: /home/jovyan/work/datasets/voxsrc2021/dev/rttm/{uri}.rttm
+          annotated: /home/jovyan/work/datasets/voxsrc2021/uem/{uri}.uem
 
   AMI:
     SpeakerDiarization:
