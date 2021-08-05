@@ -1,15 +1,13 @@
 import time
-
 import torch
-from IPython.display import Audio
 
 from pyannote.database import FileFinder, get_protocol
 from pyannote.metrics.diarization import DiarizationErrorRate, JaccardErrorRate
 
 preprocessors = {'audio': FileFinder()}
-protocol = get_protocol('VOXCON.SpeakerDiarization.Sample', preprocessors=preprocessors)
+protocol = get_protocol('VOXCON.SpeakerDiarization.Challenge', preprocessors=preprocessors)
 
-diarization_pipeline = torch.hub.load('pyannote/pyannote-audio', 'dia_dihard')
+diarization_pipeline = torch.hub.load('pyannote/pyannote-audio', 'dia_dihard', device = 'gpu')
 
 ders = []
 jers = []
@@ -18,14 +16,15 @@ hypotheses = []
 derMetric = DiarizationErrorRate(collar=0.25)
 jerMetric = JaccardErrorRate(collar=0.25)
 
-for file in protocol.test():
+for file in protocol.development():
+    print(file['uri'])
     hypothesis = diarization_pipeline(file)
     hypotheses.append(hypothesis)
     
     reference = file["annotation"]
     uem = file['annotated']
-    der = derMetric(reference, hypothesis, uem)['diarization error rate']
-    jer = jerMetric(reference, hypothesis, uem)['diarization error rate']
+    der = derMetric(reference, hypothesis)
+    jer = jerMetric(reference, hypothesis)
     ders.append(der)
     jers.append(jer)
     
@@ -37,10 +36,9 @@ for file in protocol.test():
 metric = DiarizationErrorRate(collar=0.25)
 
 i = 0
-for file in protocol.test():
+for file in protocol.development():
     hypotesis = hypotheses[i]
     reference = file["annotation"]
-    uem = file['annotated']
     der = metric(reference, hypotesis)
     print(der)
     i+=1
@@ -54,5 +52,5 @@ mean, (lower, upper) = metric.confidence_interval()
 print(f'DER_total = {100 * global_value:.1f}% mean = {100 * mean:.1f}%')
 print(f'lower = {100 * lower:.1f}% upper = {100 * upper:.1f}%')
 
-# for file in protocol.test():
+# for file in protocol.dev():
 #     der = derMetric(groundtruth, diarization)
