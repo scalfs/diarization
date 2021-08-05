@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install pyannote.audio==1.1.1 torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
-
 # Create a working directory
 RUN mkdir /app
 WORKDIR /app
@@ -31,3 +29,24 @@ USER user
 # All users can use /home/user as their home directory
 ENV HOME=/home/user
 RUN chmod 777 /home/user
+
+ENV CONDA_AUTO_UPDATE_CONDA=false
+ENV PATH=/home/user/miniconda/bin:$PATH
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
+    && chmod +x ~/miniconda.sh \
+    && ~/miniconda.sh -b -p ~/miniconda \
+    && rm ~/miniconda.sh \
+    && conda install -y python==3.8.0 \
+    && conda config --add channels conda-forge \
+    && conda clean -ya
+
+# CUDA 11.0-specific steps
+RUN conda install -y -c pytorch -c nvidia \
+    cudatoolkit=11.1 \
+    pytorch \
+    torchvision \
+    torchaudio \
+    tqdm \
+    pysoundfile
+
+RUN pip3 install pyannote.audio==1.1.1 
