@@ -1,8 +1,9 @@
 Databases:
   AMI: ./amicorpus/*/audio/{uri}.wav
   MUSAN: ./musan/{uri}.wav
-  # VOXCON: /app/voxsrc21-dia/data/voxconverse/sample/{uri}.wav
+  # VOXCON: /home/jovyan/work/voxsrc21-dia/data/voxconverse/sample/{uri}.wav
   VOXCON: /app/datasets/voxsrc21/dev/wav/{uri}.wav
+  VOXSRC21: /app/datasets/voxsrc21/workshop-test/wav/{uri}.wav
 
 Protocols:
   VOXCON:
@@ -12,15 +13,19 @@ Protocols:
           uri: ../lists/voxconverse/sample.lst
           annotation: ../lists/voxconverse/sample.rttm
           annotated: ../lists/voxconverse/sample.uem
-      Challenge:
+      VoxConverse:
         test:
           uri: /app/datasets/voxsrc21/test/test.lst
           annotation: /app/datasets/voxsrc21/test/rttm/{uri}.rttm
+          # annotated: /app/datasets/voxsrc21/test/uem/{uri}.uem
         development:
           uri: /app/datasets/voxsrc21/dev/dev.lst
           annotation: /app/datasets/voxsrc21/dev/rttm/{uri}.rttm
           # annotated: /app/datasets/voxsrc21/dev/uem/{uri}.uem
-        workshopTest:
+  VOXSRC21:
+    SpeakerDiarization:
+      Challenge:
+        test:
           uri: /app/datasets/voxsrc21/workshop-test/workshop-test.lst
           # annotation: /app/datasets/voxsrc21/workshop-test/rttm/{uri}.rttm
           # annotated: /app/datasets/voxsrc21/workshop-test/uem/{uri}.uem
