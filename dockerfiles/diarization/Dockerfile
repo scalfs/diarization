@@ -2,12 +2,7 @@ FROM nvidia/cuda:11.0-base-ubuntu20.04
 
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip
-
-RUN pip3 install pyannote.audio==1.1.1
-RUN pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
-
-RUN apt-get install -y \
+    python3-pip \
     curl \
     ca-certificates \
     sudo \
@@ -15,7 +10,10 @@ RUN apt-get install -y \
     git \
     bzip2 \
     libx11-6 \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install pyannote.audio==1.1.1 torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 # Create a working directory
 RUN mkdir /app
