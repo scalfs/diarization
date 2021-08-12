@@ -5,6 +5,15 @@ RUN pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f ht
 
 ENV PYANNOTE_DATABASE_CONFIG=/home/jovyan/work/voxsrc21-dia/pyannote/database.yml
 ENV EXP_DIR=/home/jovyan/work/voxsrc21-dia/pyannote
+
+USER root
+
+RUN apt-get update && apt-get install -y gcc && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+
+RUN pip3 install webrtcvad
 # RUN apt update && apt install -y --no-install-recommends \
 #     git build-essential \
 #     python3-dev python3-pip python3-setuptools
