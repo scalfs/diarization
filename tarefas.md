@@ -1,9 +1,17 @@
+24/08
+portar voxceleb 1 e 2 txt to segment to cluster_id (train e test)
+entender harryvolek/dvector e decidir se vai usar ou criar
+verificar arguments.py com o usado no paper
+
+17/08
+uis-rnn test + presaved_model Check -> Abandonar e focar no treino
+
 12/08
 
 - Criar d-vectors a partir dos embeddings
-  - Carregar audios (protocol)
-  - Entender estrutura files/folders dvector_create e portar para pyannote
-  - Sample (Train + Test)
+  - Carregar audios (protocol) Check
+  - Entender estrutura files/folders dvector_create e portar para pyannote Check
+  - Sample (Train + Test) Check
   - VoxConverse (Test + Dev)
   - VoxCeleb1 + VoxCeleb2
 - Treinar uis-rnn com os d-vetors
