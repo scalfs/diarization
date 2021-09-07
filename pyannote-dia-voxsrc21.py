@@ -10,7 +10,7 @@ protocol = get_protocol(
 diarization_pipeline = torch.hub.load(
     'pyannote/pyannote-audio', 'dia_dihard', device='gpu')
 
-for file in protocol.development():
+for file in protocol.test():
     hypothesis = diarization_pipeline(file)
 
     uri = file['uri']
