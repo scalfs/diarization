@@ -1,7 +1,7 @@
-FROM jupyter/scipy-notebook:latest
+FROM jupyter/tensorflow-notebook:814ef10d64fb
 
-RUN pip3 install pyannote.audio==1.1.1
-RUN pip3 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install pyannote.audio==1.1.1 easydict
+RUN pip install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 ENV PYANNOTE_DATABASE_CONFIG=/home/jovyan/work/voxsrc21-dia/pyannote/database.yml
 ENV EXP_DIR=/home/jovyan/work/voxsrc21-dia/pyannote
@@ -21,5 +21,3 @@ ENV EXP_DIR=/home/jovyan/work/voxsrc21-dia/pyannote
 
 # FROM jupyter-base
 # RUN pip3 install transformers barbar
-
-# RUN pip3 install easydict
