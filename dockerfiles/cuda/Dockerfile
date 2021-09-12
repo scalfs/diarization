@@ -40,7 +40,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py37
 RUN conda install -y -c pytorch \
     cudatoolkit=10.2.89 \
     "pytorch=1.7.1=py3.7_cuda10.2.89_cudnn7.6.5_0" \
-    "torchvision=0.9.2=py37_cu102" \
+    "torchvision=0.10.0=py37_cu102" \
     "torchaudio=0.7.2=py37" \
     "tensorflow-gpu=1.15.0"\
     "scipy" \
