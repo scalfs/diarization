@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     sudo \
     wget \
+    gcc \
     git \
     bzip2 \
     libx11-6 \
@@ -43,12 +44,13 @@ RUN conda install -y -c pytorch \
     "torchvision=0.10.0=py37_cu102" \
     "torchaudio=0.7.2=py37" \
     "tensorflow-gpu=1.15.0"\
-    "scipy" \
-    "scikit-learn" \
-    "tqdm" \
-    "pyyaml" \
-    "pysoundfile" \
+    "scipy=1.1.0=py37_blas_openblashb06ca3d_202" \
+    "scikit-learn=0.20.4=py37_blas_openblashebff5e3_0" \
+    "tqdm=4.38.0=py37_1" \
+    "pyyaml=5.4.1=py37h6b43d8f_1" \
     && conda clean -ya
+
+RUN conda install -c weatherhead99 webrtcvad && conda clean -ya
 
 # Set the default command to python3
 # CMD ["python3"]
