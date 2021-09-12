@@ -33,11 +33,11 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py37
     && chmod +x ~/miniconda.sh \
     && ~/miniconda.sh -b -p ~/miniconda \
     && rm ~/miniconda.sh \
-    && conda install -y python==3.7.10 \
+    && conda install -y python=3.7.0 \
     && conda config --add channels conda-forge \
     && conda clean -ya
 
-# CUDA 11.0-specific steps
+# CUDA 10.0-specific steps
 RUN conda install -y -c pytorch \
     cudatoolkit=10.2.89 \
     "pytorch=1.7.1=py3.7_cuda10.2.89_cudnn7.6.5_0" \
