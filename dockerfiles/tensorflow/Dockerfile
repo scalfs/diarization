@@ -47,7 +47,9 @@ RUN conda install -y \
     "scikit-learn=0.20.4=py37_blas_openblashebff5e3_0" \
     && conda clean -ya
 
-RUN conda install -c weatherhead99 webrtcvad && conda clean -ya
+RUN pip install webrtcvad
+
+RUN conda install librosa
 
 # Set the default command to python3
 # CMD ["python3"]

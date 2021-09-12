@@ -20,6 +20,7 @@ from configuration import get_config
 from VAD_segments import VAD_chunk
 
 config = get_config()
+config.log_path = 'voxceleb1-dev-embeddings.logs'
 log_file = os.path.abspath(config.log_path)
 logging.basicConfig(
     filename=log_file,
@@ -29,8 +30,8 @@ logging.basicConfig(
 print(f'Log path: {log_file}')
 
 
-data_path = '/home/jovyan/work/datasets/voxceleb-1/sample/wav'
-save_dir_path = '/home/jovyan/work/voxsrc21-dia/embeddings/sequences'
+data_path = '/app/datasets/voxceleb-1/dev/wav'
+save_dir_path = '/app/voxsrc21-dia/embeddings/sequences'
 os.makedirs(save_dir_path, exist_ok=True)
 
 def concat_segs(times, segs):
@@ -76,11 +77,11 @@ def get_STFTs(segs):
         S = np.abs(S) ** 2
         mel_basis = librosa.filters.mel(sr=sr, n_fft=config.nfft, n_mels=40)
         # log mel spectrogram of utterances
-        S = np.log10(np.dot(mel_basis, S) + 1e-6)        
+        S = np.log10(np.dot(mel_basis, S) + 1e-6)
         for j in range(0, S.shape[1], int(.24/config.hop)):
             if j + 36 < S.shape[1]:
                 # in order to fit on the expected shape of the embedding network we double the window
-                STFT_windows.append([S[:, j:j+24], S[:, j+12:j+36]])                
+                STFT_windows.append([S[:, j:j+24], S[:, j+12:j+36]])
             else:
                 break
     return np.array(STFT_windows)
@@ -100,7 +101,7 @@ def main():
         outputs, _ = tf.nn.dynamic_rnn(cell=lstm, inputs=batch, dtype=tf.float32, time_major=True)   # for TI-VS must use dynamic rnn
         embedded = outputs[-1]                            # the last ouput is the embedded d-vector
         embedded = normalize(embedded)                    # normalize
-    config_tensorflow = tf.ConfigProto(device_count = {'GPU': 0})
+    config_tensorflow = tf.ConfigProto(device_count = {'GPU': 2})
     saver = tf.train.Saver(var_list=tf.global_variables())
 
     all_unique_extensions = []
@@ -148,9 +149,7 @@ def main():
                 audio_id = audio_path.split('/')[-1].replace('.wav','')
 
                 logging.info(f'loading {speaker_id}-{video_id}-{audio_id} {audio_count}/{audio_quantity}')
-                utter, sr = librosa.core.load(audio_path, sr=config.sr)
-
-                # voice activity detection            
+                # voice activity detection
                 times, segs = VAD_chunk(2, audio_path)
                 concat_seg = concat_segs(times, segs)
                 STFT_windows = get_STFTs(concat_seg)
@@ -163,7 +162,8 @@ def main():
                     embeddings_batch = sess.run(embedded, feed_dict={verif:STFT_batch})
                     embeddings = np.concatenate((embeddings, embeddings_batch))
 
-                aligned_embeddings = align_embeddings(embeddings) # Turn window-level embeddings to segment-level (400ms)
+                # Turn window-level embeddings to segment-level (400ms)
+                aligned_embeddings = align_embeddings(embeddings) 
 
                 train_sequence = np.concatenate((train_sequence, aligned_embeddings))
                 for embedding in aligned_embeddings:
@@ -172,19 +172,18 @@ def main():
                 audio_count += 1
 
             speaker_count += 1
-        
-        if (speaker_count != total_speakers or speaker_count % speakers_per_batch == 0):
-            train_sequence_path = os.path.join(save_dir_path, f'vox1-train-sequences-{batch_count}.npy')
-            np.save(train_sequence_path, train_sequence)
-            
-            train_cluster_ids_path = os.path.join(save_dir_path, f'vox1-train-cluster-ids-{batch_count}.npy')
-            train_cluster_ids = np.asarray(train_cluster_ids)
-            np.save(train_cluster_ids_path, train_cluster_ids)
-            logging.info(f'saved batch {batch_count+1}/{math.ceil(speakers_per_batch/total_speakers)}')
-            
-            batch_count += 1
-            train_sequence = np.array([]).reshape(0,256)
-            train_cluster_ids = []
+            if (speaker_count == total_speakers or speaker_count % speakers_per_batch == 0):
+                train_sequence_path = os.path.join(save_dir_path, f'vox1-train-sequences-{batch_count}.npy')
+                np.save(train_sequence_path, train_sequence)
+
+                train_cluster_ids_path = os.path.join(save_dir_path, f'vox1-train-cluster-ids-{batch_count}.npy')
+                train_cluster_ids = np.asarray(train_cluster_ids)
+                np.save(train_cluster_ids_path, train_cluster_ids)
+                logging.info(f'saved batch {batch_count+1}/{math.ceil(speakers_per_batch/total_speakers)}')
+
+                batch_count += 1
+                train_sequence = np.array([]).reshape(0,256)
+                train_cluster_ids = []
 
 if __name__ == "__main__":
     """
