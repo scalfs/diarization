@@ -1,0 +1,87 @@
+FROM nvidia/cuda:10.0-base-ubuntu18.04
+
+SHELL [ "/bin/bash", "--login", "-c" ]
+
+# Install some basic utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    sudo \
+    wget \
+    gcc \
+    git \
+    bzip2 \
+    libx11-6 \
+    && rm -rf /var/lib/apt/lists/*
+
+# # Create a non-root user and switch to it
+# RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
+#     && chown -R user:user /app
+# RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-user
+# USER user
+
+# # All users can use /home/user as their home directory
+# ENV HOME=/home/user
+# RUN chmod 777 /home/user
+
+# Create a non-root user
+ARG username=scalfs
+ARG uid=1000
+ARG gid=100
+ENV USER $username
+ENV UID $uid
+ENV GID $gid
+ENV HOME /home/$USER
+
+RUN adduser --disabled-password \
+    --gecos "Non-root user" \
+    --uid $UID \
+    --gid $GID \
+    --home $HOME \
+    $USER
+
+# Install Miniconda and Python 3.7
+ENV CONDA_DIR $HOME/miniconda
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh \
+    && chmod +x ~/miniconda.sh \
+    && ~/miniconda.sh -b -p $CONDA_DIR \
+    && rm ~/miniconda.sh \
+    && conda install -y python=3.7.0 \
+    && conda config --add channels conda-forge \
+    && conda clean -ya
+
+# make non-activate conda commands available
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# make conda activate command available from /bin/bash --login shells
+RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
+
+# make conda activate command available from /bin/bash --interative shells
+RUN conda init bash
+
+# create a project directory inside user home
+ENV PROJECT_DIR $HOME/app
+RUN mkdir $PROJECT_DIR
+WORKDIR $PROJECT_DIR
+
+# CUDA 10.0-specific steps
+RUN conda install -y \
+    cudatoolkit=10.0.130 \
+    "tensorflow-gpu=1.15.0"\
+    "scipy=1.1.0=py37_blas_openblashb06ca3d_202" \
+    "scikit-learn=0.20.4=py37_blas_openblashebff5e3_0" \
+    && conda clean -ya
+
+RUN pip install webrtcvad
+
+# build the conda environment
+ENV ENV_PREFIX $PWD/env
+RUN conda update --name base --channel defaults conda && \
+    conda env create --prefix $ENV_PREFIX --file /tmp/environment.yml --force && \
+    conda clean --all --yes
+
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
+
+
+# Set the default command to python3
+# CMD ["python3"]
