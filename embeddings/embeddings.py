@@ -29,10 +29,9 @@ logging.basicConfig(
     )
 print(f'Log path: {log_file}')
 
-
 data_path = '/app/datasets/voxceleb-1/dev/wav'
 save_dir_path = '/app/voxsrc21-dia/embeddings/sequences'
-config.model_path = '/app/voxsrc21-dia/models'
+config.model_path = '/app/voxsrc21-dia/models/model.ckpt-46'
 os.makedirs(save_dir_path, exist_ok=True)
 
 def concat_segs(times, segs):
