@@ -51,5 +51,7 @@ RUN pip install webrtcvad
 
 RUN conda install librosa
 
+CMD ["python3","./voxsrc21-dia/embeddings/converse-embeddings.py"]
+
 # Set the default command to python3
 # CMD ["python3"]

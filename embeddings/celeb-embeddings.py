@@ -148,7 +148,7 @@ def main():
                 video_id = audio_path.split('/')[-2]
                 audio_id = audio_path.split('/')[-1].replace('.wav','')
 
-                logging.info(f'loading {speaker_id}-{video_id}-{audio_id} {audio_count}/{audio_quantity}')
+                logging.info(f'{speaker_id}-{video_id}-{audio_id} {audio_count}/{audio_quantity} batch:{batch_count}')
                 # voice activity detection
                 times, segs = VAD_chunk(2, audio_path)
                 concat_seg = concat_segs(times, segs)
@@ -171,6 +171,7 @@ def main():
 
                 audio_count += 1
 
+            # here: save train_sequences using stack, to separate new speaker sequence from others
             speaker_count += 1
             if (speaker_count == total_speakers or speaker_count % speakers_per_batch == 0):
                 train_sequence_path = os.path.join(save_dir_path, f'vox1-train-sequences-{batch_count}.npy')
@@ -179,7 +180,7 @@ def main():
                 train_cluster_ids_path = os.path.join(save_dir_path, f'vox1-train-cluster-ids-{batch_count}.npy')
                 train_cluster_ids = np.asarray(train_cluster_ids)
                 np.save(train_cluster_ids_path, train_cluster_ids)
-                logging.info(f'saved batch {batch_count+1}/{math.ceil(speakers_per_batch/total_speakers)}')
+                logging.info(f'saved batch {batch_count}/{math.ceil(speakers_per_batch/total_speakers)}')
 
                 batch_count += 1
                 train_sequence = np.array([]).reshape(0,256)

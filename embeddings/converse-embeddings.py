@@ -32,24 +32,8 @@ print(f'Log path: {log_file}')
 data_path = '/app/datasets/voxconverse/dev/wav'
 rttm_path = '/app/datasets/voxconverse/dev/rttm'
 save_dir_path = '/app/voxsrc21-dia/embeddings/sequences/voxconverse-dev'
+config.model_path = '/app/voxsrc21-dia/models/model.ckpt-46'
 os.makedirs(save_dir_path, exist_ok=True)
-
-# Data prep
-# I'm saving only 2 embeddings i.e. first and last tisv_frames for given interval in an audio. So each .npy
-# embedding file will have a shape of (2, 256)
-tf.reset_default_graph()
-batch_size = 2 # Fixing to 2 since we take 2 for each interval #utter_batch.shape[1]
-verif = tf.placeholder(shape=[None, batch_size, 40], dtype=tf.float32)  # verification batch (time x batch x n_mel)
-batch = tf.concat([verif,], axis=1)
-# embedding lstm (3-layer default)
-with tf.variable_scope("lstm"):
-    lstm_cells = [tf.contrib.rnn.LSTMCell(num_units=config.hidden, num_proj=config.proj) for i in range(config.num_layer)]
-    lstm = tf.contrib.rnn.MultiRNNCell(lstm_cells)    # make lstm op and variables
-    outputs, _ = tf.nn.dynamic_rnn(cell=lstm, inputs=batch, dtype=tf.float32, time_major=True)   # for TI-VS must use dynamic rnn
-    embedded = outputs[-1]                            # the last ouput is the embedded d-vector
-    embedded = normalize(embedded)                    # normalize
-config_tensorflow = tf.ConfigProto(device_count = {'GPU': 0})
-saver = tf.train.Saver(var_list=tf.global_variables())
 
 def concat_segs(times, segs):
     # Concatenate continuous voiced segments
@@ -137,76 +121,94 @@ def align_embeddings(embeddings, intervals):
 def getOnsets(turn):
     return turn.onset
 
-all_unique_extensions = []
-# Using List as default factory
-audio_files = defaultdict(list)
-rttm_files = defaultdict(list)
-
-for audio_file in os.listdir(data_path):
-    if audio_file.startswith('.'): #hidden folders
-        continue;
-    audio_id = os.path.splitext(audio_file)[0]
-    extension = os.path.splitext(audio_file)[1]
-    all_unique_extensions.append(extension)
-#     print(f'Audio id: {audio_id}')
-    if extension == '.wav':
-        audio_files[audio_id].append(os.path.join(data_path, audio_file))
-        rttm_files[audio_id].append(os.path.join(rttm_path, audio_id + '.rttm'))
-    else:
-        logging.info(f'Wrong file type in {os.path.join(data_path, audio_file)}')
-
-audio_quantity = len(audio_files)
-logging.info(f'Unique file extensions: {set(all_unique_extensions)}')
-logging.info(f'Number of audios: {audio_quantity}')
-logging.info(f'Number of rttms: {len(rttm_files)}')
-
-# Extract embeddings
-# Each embedding saved file will have (2, 256)
-with tf.Session(config=config_tensorflow) as sess:
-    tf.global_variables_initializer().run()
-    saver.restore(sess, config.model_path)
-   
-    audio_count = 0
-    train_sequences = np.array([]).reshape(0, 256)
-#     train_cluster_ids = []
+def main():
+    # Data prep
+    # I'm saving only 2 embeddings i.e. first and last tisv_frames for given interval in an audio. So each .npy
+    # embedding file will have a shape of (2, 256)
+    tf.reset_default_graph()
+    batch_size = 2 # Fixing to 2 since we take 2 for each interval #utter_batch.shape[1]
+    verif = tf.placeholder(shape=[None, batch_size, 40], dtype=tf.float32)  # verification batch (time x batch x n_mel)
+    batch = tf.concat([verif,], axis=1)
+    # embedding lstm (3-layer default)
+    with tf.variable_scope("lstm"):
+        lstm_cells = [tf.contrib.rnn.LSTMCell(num_units=config.hidden, num_proj=config.proj) for i in range(config.num_layer)]
+        lstm = tf.contrib.rnn.MultiRNNCell(lstm_cells)    # make lstm op and variables
+        outputs, _ = tf.nn.dynamic_rnn(cell=lstm, inputs=batch, dtype=tf.float32, time_major=True)   # for TI-VS must use dynamic rnn
+        embedded = outputs[-1]                            # the last ouput is the embedded d-vector
+        embedded = normalize(embedded)                    # normalize
+    config_tensorflow = tf.ConfigProto(device_count = {'GPU': 0})
+    saver = tf.train.Saver(var_list=tf.global_variables())
     
-    for audio_id, audio_path in audio_files.items():
-        # Path: audio_files.get(audio_id)[0]
-        logging.info(f'loading {audio_id} {audio_count}/{audio_quantity}')
-
-        # voice activity detection            
-        times, segs = VAD_chunk(2, audio_path)
-        concat_seg, concat_times = concat_segs(times, segs)
-        STFT_windows, time_windows = get_STFTs(concat_seg, concat_times)
-        # print(len(STFT_windows), STFT_windows[0].shape)
-
-        embeddings = np.array([]).reshape(0,256)
-        for STFT_window in STFT_windows:
-            STFT_batch = np.transpose(STFT_window, axes=(2,0,1))
-            # print(STFT_batch.shape) (24, 2, 40) (240ms window * batch 2 * mels 40)
-            embeddings_batch = sess.run(embedded, feed_dict={verif:STFT_batch})
-            embeddings = np.concatenate((embeddings, embeddings_batch))
-            
-        # Turn window-level embeddings to segment-level (400ms)
-        aligned_embeddings, segment_intervals = align_embeddings(embeddings, time_windows)
+    all_unique_extensions = []
+    # Using List as default factory
+    audio_files = defaultdict(list)
+    rttm_files = defaultdict(list)
+    
+    for audio_file in os.listdir(data_path):
+        if audio_file.startswith('.'): #hidden folders
+            continue;
+        audio_id = os.path.splitext(audio_file)[0]
+        extension = os.path.splitext(audio_file)[1]
+        all_unique_extensions.append(extension)
+    #     print(f'Audio id: {audio_id}')
+        if extension == '.wav':
+            audio_files[audio_id].append(os.path.join(data_path, audio_file))
+            rttm_files[audio_id].append(os.path.join(rttm_path, audio_id + '.rttm'))
+        else:
+            logging.info(f'Wrong file type in {os.path.join(data_path, audio_file)}')
+    
+    audio_quantity = len(audio_files)
+    logging.info(f'Unique file extensions: {set(all_unique_extensions)}')
+    logging.info(f'Number of audios: {audio_quantity}')
+    logging.info(f'Number of rttms: {len(rttm_files)}')
+    
+    # Extract embeddings
+    # Each embedding saved file will have (2, 256)
+    with tf.Session(config=config_tensorflow) as sess:
+        tf.global_variables_initializer().run()
+        saver.restore(sess, config.model_path)
+    
+        audio_count = 0
+        train_sequences = np.array([]).reshape(0, 256)
+    #     train_cluster_ids = []
         
-#         # Comparar com o turns retornado pelo load_rttm para montar o train_cluster_ids
-#         turns, _, _ = load_rttm(rttm_files.get(audio_id)[0])
-#         for interval in time_windows:
-#             train_cluster_ids.append(str(speaker_count))
+        for audio_id, audio_path in audio_files.items():
+            # Path: audio_files.get(audio_id)[0]
+            logging.info(f'loading {audio_id} {audio_count}/{audio_quantity}')
+    
+            # voice activity detection            
+            times, segs = VAD_chunk(2, audio_path)
+            concat_seg, concat_times = concat_segs(times, segs)
+            STFT_windows, time_windows = get_STFTs(concat_seg, concat_times)
+            # print(len(STFT_windows), STFT_windows[0].shape)
+    
+            embeddings = np.array([]).reshape(0,256)
+            for STFT_window in STFT_windows:
+                STFT_batch = np.transpose(STFT_window, axes=(2,0,1))
+                # print(STFT_batch.shape) (24, 2, 40) (240ms window * batch 2 * mels 40)
+                embeddings_batch = sess.run(embedded, feed_dict={verif:STFT_batch})
+                embeddings = np.concatenate((embeddings, embeddings_batch))
+                
+            # Turn window-level embeddings to segment-level (400ms)
+            aligned_embeddings, segment_intervals = align_embeddings(embeddings, time_windows)
             
-        train_sequences = np.stack((train_sequences, aligned_embeddings))
-
-        audio_count += 1
-        
-        if (audio_count == audio_quantity or audio_count % 20 == 0):
-            train_sequences_path = os.path.join(save_dir_path, f'voxcon-dev-train-sequences.npy')
-            np.save(train_sequences_path, train_sequences)
+    #         # Comparar com o turns retornado pelo load_rttm para montar o train_cluster_ids
+    #         turns, _, _ = load_rttm(rttm_files.get(audio_id)[0])
+    #         for interval in time_windows:
+    #             train_cluster_ids.append(str(speaker_count))
+                
+            train_sequences = np.stack((train_sequences, aligned_embeddings))
+    
+            audio_count += 1
             
-#             train_cluster_ids_path = os.path.join(save_dir_path, f'voxcon-dev-train-cluster-ids.npy')
-#             train_cluster_ids = np.asarray(train_cluster_ids)
-#             np.save(train_cluster_ids_path, train_cluster_ids)
-            logging.info(f'saved train sequence {audio_count}/{audio_quantity}')
+            if (audio_count == audio_quantity or audio_count % 20 == 0):
+                train_sequences_path = os.path.join(save_dir_path, f'voxcon-dev-train-sequences.npy')
+                np.save(train_sequences_path, train_sequences)
+                
+    #             train_cluster_ids_path = os.path.join(save_dir_path, f'voxcon-dev-train-cluster-ids.npy')
+    #             train_cluster_ids = np.asarray(train_cluster_ids)
+    #             np.save(train_cluster_ids_path, train_cluster_ids)
+                logging.info(f'saved train sequence {audio_count}/{audio_quantity}')
     
 if __name__ == "__main__":
     """
