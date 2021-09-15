@@ -114,7 +114,8 @@ def align_embeddings(embeddings, intervals):
         
         partition_interval = intervals[partition[0]:partition[1]]
         interval_onset = partition_interval[0][0]   #start of first partition
-        interval_offset = partition_interval[-2][1] #end of last partition
+        last_partition_idx = -2 if len(partition_interval) > 1 else -1
+        interval_offset = partition_interval[last_partition_idx][1] #end of last partition
         segment_intervals.append([interval_onset, interval_offset])
     return avg_embeddings, np.array(segment_intervals)
 
@@ -169,7 +170,8 @@ def main():
         saver.restore(sess, config.model_path)
     
         audio_count = 0
-        train_sequences = np.array([]).reshape(0, 256)
+        train_sequences = []
+        sequence_intervals = []
     #     train_cluster_ids = []
         
         for audio_id, audio_path in audio_files.items():
@@ -197,13 +199,17 @@ def main():
     #         for interval in time_windows:
     #             train_cluster_ids.append(str(speaker_count))
                 
-            train_sequences = np.stack((train_sequences, aligned_embeddings))
+            train_sequences.append(aligned_embeddings)
+            sequence_intervals.append(segment_intervals)
     
             audio_count += 1
             
             if (audio_count == audio_quantity or audio_count % 20 == 0):
                 train_sequences_path = os.path.join(save_dir_path, f'voxcon-dev-train-sequences.npy')
                 np.save(train_sequences_path, train_sequences)
+
+                intervals_path = os.path.join(save_dir_path, f'voxcon-dev-intervals.npy')
+                np.save(intervals_path, sequence_intervals)
                 
     #             train_cluster_ids_path = os.path.join(save_dir_path, f'voxcon-dev-train-cluster-ids.npy')
     #             train_cluster_ids = np.asarray(train_cluster_ids)
