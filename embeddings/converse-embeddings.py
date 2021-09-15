@@ -152,8 +152,8 @@ def main():
         all_unique_extensions.append(extension)
     #     print(f'Audio id: {audio_id}')
         if extension == '.wav':
-            audio_files[audio_id].append(os.path.join(data_path, audio_file))
-            rttm_files[audio_id].append(os.path.join(rttm_path, audio_id + '.rttm'))
+            audio_files[audio_id] = os.path.join(data_path, audio_file)
+            rttm_files[audio_id] = os.path.join(rttm_path, audio_id + '.rttm')
         else:
             logging.info(f'Wrong file type in {os.path.join(data_path, audio_file)}')
     
