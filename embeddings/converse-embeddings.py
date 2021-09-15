@@ -20,7 +20,7 @@ from rttm import load_rttm, Turn
 from VAD_segments import VAD_chunk
 
 config = get_config()
-config.log_path = 'voxconverse-dev-embeddings.logs'
+config.log_path = 'voxconverse-test-embeddings.logs'
 log_file = os.path.abspath(config.log_path)
 logging.basicConfig(
     filename=log_file,
@@ -29,9 +29,9 @@ logging.basicConfig(
     )
 print(f'Log path: {log_file}')
 
-data_path = '/app/datasets/voxconverse/dev/wav'
-rttm_path = '/app/datasets/voxconverse/dev/rttm'
-save_dir_path = '/app/voxsrc21-dia/embeddings/sequences/voxconverse-dev'
+data_path = '/app/datasets/voxconverse/test/wav'
+rttm_path = '/app/datasets/voxconverse/test/rttm'
+save_dir_path = '/app/voxsrc21-dia/embeddings/sequences/voxconverse-test'
 config.model_path = '/app/voxsrc21-dia/models/model.ckpt-46'
 os.makedirs(save_dir_path, exist_ok=True)
 
@@ -61,7 +61,7 @@ def concat_segs(times, segs):
         seg_offset = times[i+1][1]
         seg_interval = [seg_onset, seg_offset]
         concat_times.append(seg_interval)
-        
+
     return concat_seg, concat_times
 
 def get_STFTs(segs, time_segs):
@@ -75,9 +75,9 @@ def get_STFTs(segs, time_segs):
         mel_basis = librosa.filters.mel(sr=sr, n_fft=config.nfft, n_mels=40)
         # log mel spectrogram of utterances
         S = np.log10(np.dot(mel_basis, S) + 1e-6)
-        
+
         # S.shape[1] ~= math.ceil((time_segs[i][1] - time_segs[i][0])*100+1)
-        segment_time_onset = time_segs[i][0]    
+        segment_time_onset = time_segs[i][0]
         for j in range(0, S.shape[1], int(.24/config.hop)): # 0.24 / 0.01 = 24.0
             # if hop != 0.01, we can't use 12, 24, 36 frames (they stop making sense)
             # 36 frames are related to .36s of the audio
@@ -106,12 +106,12 @@ def align_embeddings(embeddings, intervals):
             j += 1
     else:
         partitions.append((start,end))
-    
+
     avg_embeddings = np.zeros((len(partitions),256))
-    segment_intervals = [] 
+    segment_intervals = []
     for i, partition in enumerate(partitions):
         avg_embeddings[i] = np.average(embeddings[partition[0]:partition[1]],axis=0)
-        
+
         partition_interval = intervals[partition[0]:partition[1]]
         interval_onset = partition_interval[0][0]   #start of first partition
         last_partition_idx = -2 if len(partition_interval) > 1 else -1
@@ -139,12 +139,12 @@ def main():
         embedded = normalize(embedded)                    # normalize
     config_tensorflow = tf.ConfigProto(device_count = {'GPU': 0})
     saver = tf.train.Saver(var_list=tf.global_variables())
-    
+
     all_unique_extensions = []
     # Using List as default factory
     audio_files = defaultdict(list)
     rttm_files = defaultdict(list)
-    
+
     for audio_file in os.listdir(data_path):
         if audio_file.startswith('.'): #hidden folders
             continue;
@@ -157,65 +157,65 @@ def main():
             rttm_files[audio_id] = os.path.join(rttm_path, audio_id + '.rttm')
         else:
             logging.info(f'Wrong file type in {os.path.join(data_path, audio_file)}')
-    
+
     audio_quantity = len(audio_files)
     logging.info(f'Unique file extensions: {set(all_unique_extensions)}')
     logging.info(f'Number of audios: {audio_quantity}')
     logging.info(f'Number of rttms: {len(rttm_files)}')
-    
+
     # Extract embeddings
     # Each embedding saved file will have (2, 256)
     with tf.Session(config=config_tensorflow) as sess:
         tf.global_variables_initializer().run()
         saver.restore(sess, config.model_path)
-    
+
         audio_count = 0
         train_sequences = []
         sequence_intervals = []
     #     train_cluster_ids = []
-        
+
         for audio_id, audio_path in audio_files.items():
             # Path: audio_files.get(audio_id)[0]
             logging.info(f'loading {audio_id} {audio_count}/{audio_quantity}')
-    
-            # voice activity detection            
+
+            # voice activity detection
             times, segs = VAD_chunk(2, audio_path)
             concat_seg, concat_times = concat_segs(times, segs)
             STFT_windows, time_windows = get_STFTs(concat_seg, concat_times)
             # print(len(STFT_windows), STFT_windows[0].shape)
-    
+
             embeddings = np.array([]).reshape(0,256)
             for STFT_window in STFT_windows:
                 STFT_batch = np.transpose(STFT_window, axes=(2,0,1))
                 # print(STFT_batch.shape) (24, 2, 40) (240ms window * batch 2 * mels 40)
                 embeddings_batch = sess.run(embedded, feed_dict={verif:STFT_batch})
                 embeddings = np.concatenate((embeddings, embeddings_batch))
-                
+
             # Turn window-level embeddings to segment-level (400ms)
             aligned_embeddings, segment_intervals = align_embeddings(embeddings, time_windows)
-            
+
     #         # Comparar com o turns retornado pelo load_rttm para montar o train_cluster_ids
     #         turns, _, _ = load_rttm(rttm_files.get(audio_id)[0])
     #         for interval in time_windows:
     #             train_cluster_ids.append(str(speaker_count))
-                
+
             train_sequences.append(aligned_embeddings)
             sequence_intervals.append(segment_intervals)
-    
+
             audio_count += 1
-            
+
             if (audio_count == audio_quantity or audio_count % 20 == 0):
-                train_sequences_path = os.path.join(save_dir_path, f'voxcon-dev-train-sequences.npy')
+                train_sequences_path = os.path.join(save_dir_path, f'voxcon-test-train-sequences.npy')
                 np.save(train_sequences_path, train_sequences)
 
-                intervals_path = os.path.join(save_dir_path, f'voxcon-dev-intervals.npy')
+                intervals_path = os.path.join(save_dir_path, f'voxcon-test-intervals.npy')
                 np.save(intervals_path, sequence_intervals)
-                
+
     #             train_cluster_ids_path = os.path.join(save_dir_path, f'voxcon-dev-train-cluster-ids.npy')
     #             train_cluster_ids = np.asarray(train_cluster_ids)
     #             np.save(train_cluster_ids_path, train_cluster_ids)
                 logging.info(f'saved train sequence {audio_count}/{audio_quantity}')
-    
+
 if __name__ == "__main__":
     """
     Speaker embeddings program:
