@@ -20,7 +20,7 @@ from rttm import load_rttm, Turn
 from VAD_segments import VAD_chunk
 
 config = get_config()
-config.log_path = 'voxconverse-test-embeddings.logs'
+config.log_path = 'voxconverse-dev-embeddings.logs'
 log_file = os.path.abspath(config.log_path)
 logging.basicConfig(
     filename=log_file,
@@ -29,8 +29,8 @@ logging.basicConfig(
 )
 print(f'Log path: {log_file}')
 
-data_path = '/app/datasets/voxconverse/test/wav'
-rttm_path = '/app/datasets/voxconverse/test/rttm'
+data_path = '/app/datasets/voxconverse/dev/wav'
+rttm_path = '/app/datasets/voxconverse/dev/rttm'
 save_dir_path = '/app/voxsrc21-dia/embeddings/sequences'
 config.model_path = '/app/voxsrc21-dia/models/model.ckpt-46'
 os.makedirs(save_dir_path, exist_ok=True)
@@ -237,18 +237,18 @@ def main():
 
             if (audio_count == audio_quantity or audio_count % 20 == 0):
                 train_sequences_path = os.path.join(
-                    save_dir_path, f'voxcon-test-sequences.npy')
+                    save_dir_path, f'voxcon-dev-sequences.npy')
                 np.save(train_sequences_path, train_sequences)
 
                 intervals_path = os.path.join(
-                    save_dir_path, f'voxcon-test-intervals.npy')
+                    save_dir_path, f'voxcon-dev-intervals.npy')
                 np.save(intervals_path, sequence_intervals)
 
     #             train_cluster_ids_path = os.path.join(save_dir_path, f'voxcon-dev-train-cluster-ids.npy')
     #             train_cluster_ids = np.asarray(train_cluster_ids)
     #             np.save(train_cluster_ids_path, train_cluster_ids)
                 logging.info(
-                    f'saved test sequence {audio_count}/{audio_quantity}')
+                    f'saved dev sequence {audio_count}/{audio_quantity}')
 
 
 if __name__ == "__main__":
