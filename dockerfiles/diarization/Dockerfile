@@ -51,4 +51,6 @@ RUN conda install -y -c pytorch -c nvidia \
 
 RUN pip3 install pyannote.audio==1.1.1 
 
-CMD ["python3" , "voxsrc21-dia/pyannote-dia-voxsrc21.py"]
+RUN pip3 install uisrnn
+
+CMD ["python3" , "voxsrc21-dia/uis-rnn/uis-rnn.py"]
