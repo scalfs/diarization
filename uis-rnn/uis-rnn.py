@@ -21,9 +21,10 @@ def diarization_experiment(model_args, training_args, inference_args):
 def main():
     """The main function."""
     model_args, training_args, inference_args = uisrnn.parse_arguments()
-    print(
+    print(training_args)
     diarization_experiment(model_args, training_args, inference_args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
+    print('Program completed!')
