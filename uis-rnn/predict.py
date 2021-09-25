@@ -55,9 +55,10 @@ def predict(model_args, inference_args):
         print('-' * 80)
 
         annotation = Annotation()
-        for speaker_id in predicted_cluster_id:
-            annotation[Segment(test_intervals[idx][0],
-                               test_intervals[idx][1])] = speaker_id
+        for jdx, speaker_id in enumerate(predicted_cluster_id):
+            segment_interval = test_intervals[idx][jdx]
+            annotation[Segment(segment_interval[0],
+                               segment_interval[1])] = speaker_id
 
         rttmFile = '/app/rttm/{}.rttm'.format(audio_id)
         with open(rttmFile, 'w') as writeRttmFile:
