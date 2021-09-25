@@ -31,6 +31,7 @@ NUM_WORKERS = 3
 
 def predict(model_args, inference_args):
 
+    model_args.crp_alpha = 0.76
     model = uisrnn.UISRNN(model_args)
 
     model.load(SAVED_MODEL_NAME)
@@ -55,8 +56,8 @@ def predict(model_args, inference_args):
 
         annotation = Annotation()
         for speaker_id in predicted_cluster_id:
-            annotation[Segment(test_intervals[0],
-                               test_intervals[1])] = speaker_id
+            annotation[Segment(test_intervals[idx][0],
+                               test_intervals[idx][1])] = speaker_id
 
         rttmFile = '/app/rttm/{}.rttm'.format(audio_id)
         with open(rttmFile, 'w') as writeRttmFile:
