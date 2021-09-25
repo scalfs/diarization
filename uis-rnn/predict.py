@@ -29,9 +29,11 @@ SAVED_MODEL_NAME = 'voxcon_full_model.uisrnn'
 NUM_WORKERS = 3
 
 
-def predict(inference_args):
+def predict(model_args, inference_args):
 
-    model = uisrnn.load(SAVED_MODEL_NAME)
+    model = uisrnn.UISRNN(model_args)
+
+    model.load(SAVED_MODEL_NAME)
 
     # testing
     predicted_cluster_ids = {}
@@ -75,9 +77,9 @@ def predict(inference_args):
 
 def main():
     """The main function."""
-    _, _, inference_args = uisrnn.parse_arguments()
-    print(inference_args)
-    predict(inference_args)
+    model_args, _, inference_args = uisrnn.parse_arguments()
+    print(model_args, inference_args)
+    predict(model_args, inference_args)
 
 
 if __name__ == "__main__":
