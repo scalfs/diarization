@@ -19,5 +19,7 @@ RUN pip install webrtcvad
 #     python3-dev python3-pip python3-setuptools
 # RUN pip -q install pip --upgrade
 
+RUN pip install uisrnn spectralcluster
+
 # FROM jupyter-base
 # RUN pip3 install transformers barbar

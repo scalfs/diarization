@@ -49,8 +49,6 @@ RUN conda install -y -c pytorch -c nvidia \
     tqdm \
     pysoundfile
 
-RUN pip3 install pyannote.audio==1.1.1 
+RUN pip3 install pyannote.audio==1.1.1 uisrnn spectralcluster
 
-RUN pip3 install uisrnn
-
-CMD ["python3" , "voxsrc21-dia/uis-rnn/uis-rnn.py"]
+# CMD ["python3" , "voxsrc21-dia/uis-rnn/uis-rnn.py"]
