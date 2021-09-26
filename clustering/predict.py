@@ -1,6 +1,4 @@
-import os
 import numpy as np
-from collections import defaultdict
 
 from spectralcluster import SpectralClusterer
 from spectralcluster import RefinementOptions, refinement
@@ -10,7 +8,7 @@ from spectralcluster import ICASSP2018_REFINEMENT_SEQUENCE
 from pyannote.core import Annotation, Segment
 
 base_dir = '/app'
-rttm_dir = '{}/voxcon-test-rttm'.format(base_dir)
+rttm_dir = '{}/voxsrc21-spectral-rttm'.format(base_dir)
 
 # sequences of segment-level embeddings
 voxcon_test_seqs = np.load(
@@ -29,6 +27,11 @@ voxcon_test_audio_ids = ["aepyx", "aiqwk", "bjruf", "bmsyn", "bxcfq", "byapz", "
                          "zfzlc", "zowse", "zqidv", "zztbo", "ralnu", "uicid", "laoyl", "jxydp", "pzxit", "upshw", "gfneh", "kzmyi", "nkqzr", "kgjaa", "dkabn", "eucfa", "erslt", "mclsr", "fzwtp", "dzxut", "pkwrt", "gmmwm", "leneg", "sxqvt", "pgtkk", "fuzfh", "vtzqw", "rsypp", "qxana", "optsn", "dxokr", "ptses", "isxwc", "gzhwb", "mhwyr", "duvox", "ezxso", "jgiyq", "rpkso", "kmjvh", "wcxfk", "gcvrb", "eddje", "pccww", "vuewy", "tvtoe", "oubab", "jwggf", "aggyz", "bidnq", "neiye", "mkhie", "iowob", "jbowg", "gwloo", "uevxo", "nitgx", "eoyaz", "qoarn", "mxdpo", "auzru", "diysk", "cwbvu", "jeymh", "iacod", "cawnd", "vgaez", "bgvvt", "tiido", "aorju", "qajyo", "ryken", "iabca", "tkhgs", "tbjqx", "mqtep", "fowhl", "fvhrk", "nqcpi", "mbzht", "uhfrw", "utial", "cpebh", "tnjoh", "jsymf", "vgevv", "mxduo", "gkiki", "bvyvm", "hqhrb", "isrps", "nqyqm", "dlast", "pxqme", "bpzsc", "vdlvr", "lhuly", "crorm", "bvqnu", "tpnyf", "thnuq", "swbnm", "cadba", "sbrmv", "wibky", "wlfsf", "wwvcs", "xffsa", "xkmqx", "xlsme", "ygrip", "ylgug", "ytula", "zehzu", "zsgto", "zzsba", "zzyyo"]
 voxsrc21_audio_ids = ["tpine", "huqpy", "uzsvq", "pirso", "npnyp", "jsatj", "kuunx", "klbrr", "ecugo", "dwtow", "lhbqr", "zfipy", "wsobx", "jxkah", "hjvtj", "dpbgj", "phcxl", "uddju", "hufrz", "fibgq", "ahrcr", "cnbhz", "ahpuj", "biypq", "taukp", "iwvbh", "zobzz", "chvgo", "zsngo", "ixbvn", "ruwbp", "dufvn", "hajxp", "ohjjf", "veada", "zfzwt", "aqlrr", "qvroz", "cqfbd", "hzttx", "jrxnz", "gcccl", "qgzvk", "ieaoq", "jwezt", "ovxrk", "oitjh", "xivtm", "rnmrp", "euhwq", "iflmj", "hffvn", "eoxkf", "ycycy", "fwjhb", "yhntc", "ersxa", "afhlm", "uhpjz", "saenk", "oszsp", "zkmgn", "cgjuc", "vofje", "ajjmr", "mkbjy", "cxrjf", "jbirg", "hmnyo", "mknge", "xahab", "svnoe", "iucho", "uwgqx", "sfjjj", "rymcy", "rycwr", "fdtlj", "ewkei", "pojyu", "vrgwd", "bfwgq", "goots", "mrbme", "nzoid", "cehwp", "uosun", "pzrcf", "kpecv", "pwutv", "ipszk", "ktmre", "bylqb", "mrgru", "osrss", "ftajg", "xairp", "whibh", "xmkio", "rvyug", "tealt", "ezptn", "kpihx", "ubthy", "njuto", "komgz", "ahcuo", "lcowh", "vuqbp", "wnoyw", "zliuj", "dvofo", "yhivq", "xvaqn", "ixcig", "zauxp", "nzonc", "rvrlo", "xesmw", "mylgb", "askiw", "nsibk", "quinj", "swpjb", "fsfdw", "kcoeu", "eeivl", "tuczd", "jjbsx", "ytvbn", "dwsdu",
                       "fseqv", "zjrun", "pqifp", "aqind", "enrur", "vtdos", "ymvrw", "welcq", "wazie", "ssbra", "kxzac", "tcwva", "epbjz", "hkfjg", "bwpth", "cnwba", "vghwm", "usxym", "yyldd", "govov", "ueoss", "ivmhq", "gsigu", "sotzc", "ebixn", "zhcic", "ckivy", "tldnh", "hiukp", "lvrse", "sdpur", "ubitk", "reljk", "hfzhn", "axabh", "bmldz", "ujdjd", "kgzrb", "msnqr", "syucd", "ognux", "ahorw", "ifafa", "bpbon", "yywxf", "qezbm", "sljce", "nttgg", "uupjc", "gukfd", "hexbr", "jnoor", "rfyhi", "pbocz", "eqalx", "tpfau", "aoehz", "hmkzx", "zdymj", "qxezs", "irswh", "zktli", "dkpkx", "cqhil", "kxjyn", "rjpos", "kqlln", "vqzkm", "jucfh", "wjwes", "mebni", "ubogn", "obsbu", "dsuiy", "fmtir", "alpmg", "sndtu", "tkxsz", "qnuxe", "ctjzs", "uelsx", "xwaec", "bzlts", "fftup", "fqpdh", "ffcio", "wofgd", "oiyjs", "avvvz", "tbedi", "zyjfv", "bgkus", "linoq", "ptctn", "fhjbj", "wmhps", "lceba", "msswz", "rxldb", "lqvix", "vwgph", "zsgyz", "anojt", "lwxbp", "slldp", "jpjcy", "xpewn", "bamsl", "qmsgw", "wayap", "eizev", "nbema", "sqtvn", "oewsu", "rjdar", "rjmds", "vwftp", "ckeyp", "fcghr", "jfkiy", "ogkch", "iadsf", "jrnnn", "vjkrd", "brxew", "uyykg", "xikii", "zskbo", "xmezt", "kygkd", "rpjuz", "bmria", "eumxr"]
+
+# To be used on prediction
+sequences = voxsrc21_seqs
+intervals = voxsrc21_intervals
+sample_ids = voxsrc21_audio_ids
 
 # Configurations that are closest to the ICASSP2018 paper
 # "Speaker Diarization with LSTM".
@@ -64,13 +67,9 @@ icassp2018_clusterer = SpectralClusterer(
     refinement_options=icassp2018_refinement_options,
     custom_dist="cosine")
 
-sequences = voxcon_test_seqs
-intervals = voxcon_test_intervals
-sample_ids = voxcon_test_audio_ids
-
 for idx, sample_id in enumerate(sample_ids):
     labels = icassp2018_clusterer.predict(sequences[idx])
-    print('Predicted labels: ', sample_id, f' {idx}/{len(sample_ids)}')
+    print('Predicted labels: ', sample_id, f' {idx+1}/{len(sample_ids)}')
 
     annotation = Annotation()
     annotation.uri = sample_id
@@ -79,10 +78,10 @@ for idx, sample_id in enumerate(sample_ids):
         annotation[Segment(segment_interval[0],
                            segment_interval[1])] = speaker_id
 
-    rttm_file = '{}/rttm/{}.rttm'.format(rttm_dir, sample_id)
+    rttm_file = '{}/{}.rttm'.format(rttm_dir, sample_id)
     with open(rttm_file, 'w') as file:
         annotation.support().write_rttm(file)
 
-    rttm_file_collar = '{}/rttm_colar/{}.rttm'.format(rttm_dir, sample_id)
-    with open(rttm_file_collar, 'w') as file:
-        annotation.support(0.481).write_rttm(file)
+    # rttm_file_collar = '{}/rttm_colar/{}.rttm'.format(rttm_dir, sample_id)
+    # with open(rttm_file_collar, 'w') as file:
+    #     annotation.support(0.481).write_rttm(file)
