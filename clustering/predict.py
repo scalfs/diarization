@@ -79,10 +79,10 @@ for idx, sample_id in enumerate(sample_ids):
         annotation[Segment(segment_interval[0],
                            segment_interval[1])] = speaker_id
 
-    rttm_file = '{rttm_dir}/rttm/{}.rttm'.format(sample_id)
+    rttm_file = '{}/rttm/{}.rttm'.format(rttm_dir, sample_id)
     with open(rttm_file, 'w') as file:
         annotation.support().write_rttm(file)
 
-    rttm_file_collar = '{rttm_dir}/rttm_colar/{}.rttm'.format(sample_id)
+    rttm_file_collar = '{}/rttm_colar/{}.rttm'.format(rttm_dir, sample_id)
     with open(rttm_file_collar, 'w') as file:
         annotation.support(0.481).write_rttm(file)
