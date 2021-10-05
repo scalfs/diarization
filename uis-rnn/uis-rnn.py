@@ -80,7 +80,7 @@ def calculate_crp_alpha():
 
     concat_seq, concat_ids = uisrnn.utils.concatenate_training_data(
         train_sequences, train_cluster_ids)
-    contrib.estimate_crp_alpha(concat_ids, search_step=0.1)
+    contrib.estimate_crp_alpha(concat_ids, 1, 0.1)
 
 
 SAVED_MODEL_NAME = 'voxcon_full_model.uisrnn'
@@ -110,15 +110,15 @@ def diarization_experiment(model_args, training_args, inference_args):
     model.rnn_model.share_memory()
     pool = ctx.Pool(NUM_WORKERS, maxtasksperchild=None)
     pred_gen = pool.imap(func=partial(
-        model.predict, args=inference_args), iterable=test_sequences[:5])
+        model.predict, args=inference_args), iterable=test_sequences[:10])
     # collect and score predicitons
     for idx, predicted_cluster_id in enumerate(pred_gen):
-        accuracy = uisrnn.compute_sequence_match_accuracy(
-            test_cluster_ids[idx], predicted_cluster_id)
-        predicted_cluster_ids.append(predicted_cluster_id)
-        test_record.append((accuracy, len(test_cluster_ids[idx])))
-        print('Ground truth labels:')
-        print(test_cluster_ids[idx])
+        # accuracy = uisrnn.compute_sequence_match_accuracy(
+        #     test_cluster_ids[idx], predicted_cluster_id)
+        # predicted_cluster_ids.append(predicted_cluster_id)
+        # test_record.append((accuracy, len(test_cluster_ids[idx])))
+        # print('Ground truth labels:')
+        # print(test_cluster_ids[idx])
         print('Predicted labels:')
         print(predicted_cluster_id)
         print('-' * 80)

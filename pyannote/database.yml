@@ -1,36 +1,36 @@
 Databases:
   AMI: ./amicorpus/*/audio/{uri}.wav
   MUSAN: ./musan/{uri}.wav
-  VOXCON: /home/jovyan/work/voxsrc21-dia/data/voxconverse/sample/{uri}.wav
+  VOXCON: /home/jovyan/work/datasets/voxconverse/test/wav/{uri}.wav
   # VOXCON: /app/datasets/voxsrc21/dev/wav/{uri}.wav
-  VOXSRC21: /app/datasets/voxsrc21/workshop-test/wav/{uri}.wav
+  VOXSRC21: /home/jovyan/work/datasets/voxsrc21/wav/{uri}.wav
 
 Protocols:
   VOXCON:
     SpeakerDiarization:
       Sample:
         train:
-          uri: ../lists/voxconverse/sample/train.lst
-          annotation: ../lists/voxconverse/sample/train.rttm
-          annotated: ../lists/voxconverse/sample/train.uem
+          uri: ../data/lists/voxconverse/sample/train.lst
+          annotation: ../data/lists/voxconverse/sample/train.rttm
+          annotated: ../data/lists/voxconverse/sample/train.uem
         development:
-          uri: ../lists/voxconverse/sample/dev.lst
-          annotation: ../lists/voxconverse/sample/dev.rttm
-          annotated: ../lists/voxconverse/sample/dev.uem
+          uri: ../data/lists/voxconverse/sample/dev.lst
+          annotation: ../data/lists/voxconverse/sample/dev.rttm
+          annotated: ../data/lists/voxconverse/sample/dev.uem
       VoxConverse:
         development:
-          uri: /app/datasets/voxsrc21/dev/dev.lst
-          annotation: /app/datasets/voxsrc21/dev/rttm/{uri}.rttm
+          uri: /home/jovyan/work/datasets/voxsrc21/dev/dev.lst
+          annotation: /home/jovyan/work/datasets/voxsrc21/dev/rttm/{uri}.rttm
           # annotated: /app/datasets/voxsrc21/dev/uem/{uri}.uem
         test:
-          uri: /app/datasets/voxsrc21/test/test.lst
-          annotation: /app/datasets/voxsrc21/test/rttm/{uri}.rttm
-          # annotated: /app/datasets/voxsrc21/test/uem/{uri}.uem
+          uri: /home/jovyan/work/datasets/voxconverse/test/test.lst
+          annotation: /home/jovyan/work/datasets/voxconverse/test/rttm/{uri}.rttm
+          # annotated: /app/datasets/voxconverse/test/uem/{uri}.uem
   VOXSRC21:
     SpeakerDiarization:
       Challenge:
         test:
-          uri: /app/datasets/voxsrc21/workshop-test/workshop-test.lst
+          uri: /home/jovyan/work/datasets/voxsrc21/test.lst
           # annotation: /app/datasets/voxsrc21/workshop-test/rttm/{uri}.rttm
           # annotated: /app/datasets/voxsrc21/workshop-test/uem/{uri}.uem
 
